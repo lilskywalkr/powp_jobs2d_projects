@@ -4,14 +4,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.kis.powp.jobs2d.Job2dDriver;
+import edu.kis.powp.jobs2d.command.CommandVisitor;
 import edu.kis.powp.jobs2d.command.DriverCommand;
 import edu.kis.powp.jobs2d.command.ICompoundCommand;
 import edu.kis.powp.observer.Publisher;
 
 /**
- * Driver command Manager.
+ * Command Manager.
  */
-public class DriverCommandManager {
+public class CommandManager implements ICommandManager {
     private DriverCommand currentCommand = null;
 
     private Publisher changePublisher = new Publisher();
@@ -43,6 +44,11 @@ public class DriverCommandManager {
             }
 
             @Override
+            public void accept(CommandVisitor commandVisitor) {
+                commandVisitor.visit(this);
+            }
+
+            @Override
             public Iterator<DriverCommand> iterator() {
                 return driverCommands.iterator();
             }
@@ -53,6 +59,11 @@ public class DriverCommandManager {
             }
         });
 
+    }
+
+    @Override
+    public synchronized void runCommand(Job2dDriver driver) {
+        this.currentCommand.execute(driver);
     }
 
     /**
@@ -78,4 +89,6 @@ public class DriverCommandManager {
     public Publisher getChangePublisher() {
         return changePublisher;
     }
+
+
 }

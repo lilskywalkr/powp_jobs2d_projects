@@ -7,7 +7,7 @@ import edu.kis.powp.jobs2d.Job2dDriver;
  */
 public class OperateToCommand implements DriverCommand {
 
-    private int posX, posY;
+    private final int posX, posY;
 
     public OperateToCommand(int posX, int posY) {
         super();
@@ -20,4 +20,15 @@ public class OperateToCommand implements DriverCommand {
         driver.operateTo(posX, posY);
     }
 
+    @Override
+    public void accept(CommandVisitor commandVisitor) {
+        commandVisitor.visit(this);
+    }
+
+    public int getX() {
+        return posX;
+    }
+    public int getY() {
+        return posY;
+    }
 }
