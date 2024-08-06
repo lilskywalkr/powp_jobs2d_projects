@@ -1,10 +1,5 @@
 package edu.kis.powp.jobs2d;
 
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import edu.kis.legacy.drawer.panel.DrawPanelController;
 import edu.kis.legacy.drawer.shape.LineFactory;
 import edu.kis.powp.appbase.Application;
@@ -12,8 +7,10 @@ import edu.kis.powp.jobs2d.command.ImporterFactory;
 import edu.kis.powp.jobs2d.command.JsonCommandImporter;
 import edu.kis.powp.jobs2d.command.gui.CommandManagerWindow;
 import edu.kis.powp.jobs2d.command.gui.CommandManagerWindowCommandChangeObserver;
-import edu.kis.powp.jobs2d.drivers.*;
+import edu.kis.powp.jobs2d.command.gui.HistoryFeatureObserver;
+import edu.kis.powp.jobs2d.command.manager.CommandManager;
 import edu.kis.powp.jobs2d.drivers.LoggerDriver;
+import edu.kis.powp.jobs2d.drivers.*;
 import edu.kis.powp.jobs2d.drivers.adapter.LineDriverAdapter;
 import edu.kis.powp.jobs2d.drivers.transformators.FlippingDriverDecorator;
 import edu.kis.powp.jobs2d.drivers.transformators.RotatingDriverDecorator;
@@ -21,6 +18,11 @@ import edu.kis.powp.jobs2d.drivers.transformators.ScalingDriverDecorator;
 import edu.kis.powp.jobs2d.drivers.transformators.ShiftingDriverDecorator;
 import edu.kis.powp.jobs2d.events.*;
 import edu.kis.powp.jobs2d.features.*;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TestJobs2dApp {
     private final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -51,6 +53,8 @@ public class TestJobs2dApp {
         application.addTest("Load secret command", new SelectLoadSecretCommandOptionListener());
 
         application.addTest("Load recorded command", new SelectLoadRecordedCommandOptionListener());
+
+        application.addTest("Add recorded command to history", new SelectHistoryAdditionRecordingOptionListener());
 
         application.addTest("Load deeply complex command", new SelectLoadDeeplyComplexCommandOptionListener());
 
@@ -131,9 +135,13 @@ public class TestJobs2dApp {
         CommandManagerWindow commandManager = new CommandManagerWindow(CommandsFeature.getCommandManager(), DriverFeature.getDriverManager());
         application.addWindowComponent("Command Manager", commandManager);
 
-        CommandManagerWindowCommandChangeObserver windowObserver = new CommandManagerWindowCommandChangeObserver(
-                commandManager);
+        CommandManagerWindowCommandChangeObserver windowObserver = new CommandManagerWindowCommandChangeObserver(commandManager);
         CommandsFeature.getCommandManager().getChangePublisher().addSubscriber(windowObserver);
+    }
+
+    private static void setupHistories(Application application) {
+        HistoryFeatureObserver historyFeatureObserver = new HistoryFeatureObserver((CommandManager) CommandsFeature.getCommandManager());
+        CommandsFeature.getCommandManager().getChangePublisher().addSubscriber(historyFeatureObserver);
     }
 
     /**
@@ -172,6 +180,7 @@ public class TestJobs2dApp {
                 RecordFeature.setupRecorderPlugin(app);
                 DriverFeature.setupDriverPlugin(app);
                 MouseSettingsFeature.setupMouseSettingsFeature(app);
+                HistoryFeature.setupHistoryFeature(app);
                 setupDrivers(app);
                 setupPresetTests(app);
                 setupCommandTests(app);
@@ -180,6 +189,7 @@ public class TestJobs2dApp {
                 setupLogger(app);
                 setupWindows(app);
                 setupImporters();
+                setupHistories(app);
                 app.setVisibility(true);
             }
         });
